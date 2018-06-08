@@ -1,6 +1,8 @@
 import os
 import sys
 import requests,json
+import time
+import datetime
 
 class Infos:
     def __init__(self):
@@ -17,7 +19,8 @@ if len(sys.argv) != 3:
 port = int(sys.argv[1])
 minBalance = int(sys.argv[2])
 
-f = open("AccountList.txt", "w")
+acfn = "AccountList-{}.txt".format( datetime.datetime.now().strftime('%Y-%m-%d') )
+f = open(acfn, "w")
 
 url = "http://127.0.0.1:{}".format(port)
 print("connecting to {}".format(url))
@@ -43,6 +46,7 @@ try:
                 element[0].balance = element[0].balance + srcBalance
                 element[0].pubkey = pubkey
                 element[0].accounts.append((sourceAccount,name))
+                #print(str(element[0].balance),element[0].accounts)
             else:
                 element = Infos()
                 element.balance = srcBalance
@@ -61,17 +65,17 @@ for a in accounts:
         acclist = []
         acclistN = []
         acc = ""
-        if (len(a.accounts) > 1):
+        if (len(a.accounts) > 0):
             for an in a.accounts:
                 acclist.append(an[0])
                 acclistN.append(an[1])
                 if (len(an[1]) > 0):
                     acc += str(an) + ", "
-        if len(acc) == 0:
+        if (len(acc) == 0):
             acc = str(a.accounts[0])
         
         f.write("pubkey: {} balance: {} accounts_count: {} accounts: {} names: {}\n".format(a.pubkey, round(a.balance,2), len(a.accounts), str(acclist), str(acclistN)))
         print("Balance {0: <13} accounts+name {1: <1} count {2: <1}".format(round(a.balance,2), acc, len(a.accounts)))
    
 f.close()
-print("results saved in AccountList.txt")
+print("results saved in {}".format(acfn))
